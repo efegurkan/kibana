@@ -7,18 +7,28 @@
 
 import type { IRouter } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
+import type {
+  SearchInferenceEndpointsPluginSetup,
+  SearchInferenceEndpointsPluginStart,
+} from '@kbn/search-inference-endpoints/server';
 
 import { registerStatusRoutes } from './status';
 import { registerApiKeyRoutes } from './api_key_routes';
 import { registerStatsRoutes } from './size_stats';
+import { registerDummyRoutes } from './dummy_routes';
 import type { RouterContextData } from '../types';
 
-export function defineRoutes(
-  router: IRouter,
-  logger: Logger,
-  routerContextData: RouterContextData
-) {
+interface RoutesDeps extends RouterContextData {
+  inferenceEndpointsSetup: SearchInferenceEndpointsPluginSetup;
+  getInferenceEndpointsStart: () => Promise<SearchInferenceEndpointsPluginStart>;
+}
+
+export function defineRoutes(router: IRouter, logger: Logger, deps: RoutesDeps) {
   registerApiKeyRoutes(router, logger);
   registerStatusRoutes(router, logger);
-  registerStatsRoutes(router, logger, routerContextData);
+  registerStatsRoutes(router, logger, deps);
+  registerDummyRoutes(router, logger, {
+    inferenceEndpointsSetup: deps.inferenceEndpointsSetup,
+    getInferenceEndpointsStart: deps.getInferenceEndpointsStart,
+  });
 }

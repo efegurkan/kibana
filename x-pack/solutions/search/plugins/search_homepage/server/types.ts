@@ -5,10 +5,23 @@
  * 2.0.
  */
 
+import type {
+  SearchInferenceEndpointsPluginSetup,
+  SearchInferenceEndpointsPluginStart,
+} from '@kbn/search-inference-endpoints/server';
+
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface SearchHomepagePluginSetup {}
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface SearchHomepagePluginStart {}
+
+export interface SearchHomepagePluginSetupDeps {
+  searchInferenceEndpoints: SearchInferenceEndpointsPluginSetup;
+}
+
+export interface SearchHomepagePluginStartDeps {
+  searchInferenceEndpoints: SearchInferenceEndpointsPluginStart;
+}
 
 export interface RouterContextData {
   isServerless: boolean;

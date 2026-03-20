@@ -15,6 +15,7 @@
     "requiredPlugins": [
       "share",
       "licensing",
+      "searchInferenceEndpoints"
     ],
     "optionalPlugins": [
       "cloud",

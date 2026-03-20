@@ -13,7 +13,12 @@ import type {
   IRouter,
 } from '@kbn/core/server';
 import type { SecurityPluginStart } from '@kbn/security-plugin/server';
-import type { SearchHomepagePluginStart, SearchHomepagePluginSetup } from './types';
+import type {
+  SearchHomepagePluginStart,
+  SearchHomepagePluginSetup,
+  SearchHomepagePluginSetupDeps,
+  SearchHomepagePluginStartDeps,
+} from './types';
 import { defineRoutes } from './routes';
 
 export interface RouteDependencies {
@@ -23,7 +28,13 @@ export interface RouteDependencies {
   getSecurity: () => Promise<SecurityPluginStart>;
 }
 export class SearchHomepagePlugin
-  implements Plugin<SearchHomepagePluginSetup, SearchHomepagePluginStart, {}, {}>
+  implements
+    Plugin<
+      SearchHomepagePluginSetup,
+      SearchHomepagePluginStart,
+      SearchHomepagePluginSetupDeps,
+      SearchHomepagePluginStartDeps
+    >
 {
   private readonly logger: Logger;
   private readonly isServerless: boolean;
@@ -33,14 +44,22 @@ export class SearchHomepagePlugin
     this.isServerless = initializerContext.env.packageInfo.buildFlavor === 'serverless';
   }
 
-  public setup(core: CoreSetup<{}, SearchHomepagePluginStart>) {
+  public setup(
+    core: CoreSetup<SearchHomepagePluginStartDeps, SearchHomepagePluginStart>,
+    plugins: SearchHomepagePluginSetupDeps
+  ) {
     this.logger.debug('searchHomepage: Setup');
     const router = core.http.createRouter();
 
-    // Register server side APIs
     defineRoutes(router, this.logger, {
       isServerless: this.isServerless,
+      inferenceEndpointsSetup: plugins.searchInferenceEndpoints,
+      getInferenceEndpointsStart: async () => {
+        const [, startDeps] = await core.getStartServices();
+        return startDeps.searchInferenceEndpoints;
+      },
     });
+
     return {};
   }
 
